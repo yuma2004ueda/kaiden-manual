@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>架電ディレクション自動アサイン — 取扱説明書</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3250;
+    --accent: #5b8dee;
+    --accent2: #7c5cfc;
+    --green: #2ecc87;
+    --yellow: #f7c948;
+    --red: #e05c5c;
+    --text: #e2e8f8;
+    --muted: #8892b0;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, 'Hiragino Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+  }
+
+  /* ======= HERO ======= */
+  .hero {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1440 50%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 40px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(91,141,238,.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(91,141,238,.18);
+    border: 1px solid rgba(91,141,238,.4);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    background: linear-gradient(90deg, #fff 0%, #9ab4f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 560px;
+    margin: 0 auto 32px;
+  }
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* ======= LAYOUT ======= */
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+  .layout { display: flex; gap: 32px; align-items: flex-start; padding: 48px 24px; max-width: 1200px; margin: 0 auto; }
+
+  /* ======= SIDEBAR NAV ======= */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 24px;
+  }
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 12px 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .sidebar a {
+    display: block;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all .15s;
+  }
+  .sidebar a:hover { background: var(--surface2); color: var(--text); }
+  .sidebar a.active { background: rgba(91,141,238,.15); color: var(--accent); }
+  .sidebar .sub { padding-left: 22px; font-size: 12px; }
+
+  /* ======= MAIN CONTENT ======= */
+  .main { flex: 1; min-width: 0; }
+
+  /* ======= SECTION ======= */
+  .section {
+    margin-bottom: 64px;
+    scroll-margin-top: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .section h2 { font-size: 22px; font-weight: 700; }
+  .section h3 { font-size: 16px; font-weight: 700; margin: 28px 0 12px; color: var(--accent); }
+  .section p { margin-bottom: 14px; color: #c8d0e8; font-size: 14.5px; }
+  .section ul, .section ol { padding-left: 20px; margin-bottom: 14px; }
+  .section li { margin-bottom: 6px; font-size: 14.5px; color: #c8d0e8; }
+
+  /* ======= CARD ======= */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+
+  /* ======= ARCHITECTURE DIAGRAM ======= */
+  .arch {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
+    min-width: 700px;
+    justify-content: center;
+  }
+  .arch-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 120px;
+    flex-shrink: 0;
+  }
+  .arch-node .icon { font-size: 24px; margin-bottom: 6px; }
+  .arch-node .label { font-size: 12px; font-weight: 700; color: var(--text); }
+  .arch-node .sublabel { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .arch-node.accent { border-color: var(--accent); background: rgba(91,141,238,.1); }
+  .arch-node.green { border-color: var(--green); background: rgba(46,204,135,.08); }
+  .arch-arrow {
+    color: var(--muted);
+    font-size: 20px;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+  .arch-arrow .arrow-label { font-size: 10px; color: var(--muted); text-align: center; display: block; margin-top: 2px; }
+
+  /* ======= DIFY WORKFLOW ======= */
+  .workflow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 20px 0;
+    position: relative;
+  }
+  .wf-node {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 0;
+  }
+  .wf-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 32px;
+  }
+  .wf-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .wf-dot.blue { background: rgba(91,141,238,.2); color: var(--accent); border: 2px solid var(--accent); }
+  .wf-dot.purple { background: rgba(124,92,252,.2); color: #a78bfa; border: 2px solid #a78bfa; }
+  .wf-dot.green { background: rgba(46,204,135,.2); color: var(--green); border: 2px solid var(--green); }
+  .wf-dot.orange { background: rgba(247,201,72,.2); color: var(--yellow); border: 2px solid var(--yellow); }
+  .wf-connector {
+    width: 2px;
+    height: 24px;
+    background: var(--border);
+    margin: 2px 0;
+  }
+  .wf-content { flex: 1; padding-top: 4px; }
+  .wf-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .wf-desc { font-size: 13px; color: var(--muted); }
+
+  /* ======= CHAT DEMO ======= */
+  .chat-demo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+    max-width: 560px;
+  }
+  .chat-demo-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .bubble { margin-bottom: 12px; display: flex; }
+  .bubble.user { justify-content: flex-end; }
+  .bubble.bot { justify-content: flex-start; }
+  .bubble-inner {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .bubble.user .bubble-inner {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.bot .bubble-inner {
+    background: var(--surface2);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* ======= TABLE ======= */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(46,50,80,.6);
+    color: #c8d0e8;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .tag.blue { background: rgba(91,141,238,.2); color: var(--accent); }
+  .tag.green { background: rgba(46,204,135,.2); color: var(--green); }
+  .tag.yellow { background: rgba(247,201,72,.2); color: var(--yellow); }
+  .tag.red { background: rgba(224,92,92,.2); color: var(--red); }
+
+  /* ======= ALERT BOXES ======= */
+  .alert {
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 13.5px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .alert.danger {
+    background: rgba(224,92,92,.1);
+    border: 1px solid rgba(224,92,92,.3);
+    color: #f3a0a0;
+  }
+  .alert.warning {
+    background: rgba(247,201,72,.08);
+    border: 1px solid rgba(247,201,72,.25);
+    color: #f0d580;
+  }
+  .alert.info {
+    background: rgba(91,141,238,.08);
+    border: 1px solid rgba(91,141,238,.25);
+    color: #a3baf7;
+  }
+  .alert.success {
+    background: rgba(46,204,135,.08);
+    border: 1px solid rgba(46,204,135,.25);
+    color: #7de8b8;
+  }
+  .alert strong { display: block; margin-bottom: 4px; }
+
+  /* ======= CODE ======= */
+  code {
+    font-family: 'Consolas', 'SFMono-Regular', monospace;
+    background: rgba(91,141,238,.12);
+    color: #a3baf7;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+  pre {
+    background: #0a0c14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    color: #a3baf7;
+    font-family: 'Consolas', monospace;
+    margin: 12px 0;
+    line-height: 1.6;
+  }
+  pre .comment { color: #4a5580; }
+  pre .keyword { color: #a78bfa; }
+  pre .number { color: var(--green); }
+  pre .string { color: #f0c58a; }
+
+  /* ======= STEPS ======= */
+  .steps { margin: 16px 0; }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .step-desc { font-size: 13px; color: var(--muted); }
+
+  /* ======= GRID ======= */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ======= FORMULA BOX ======= */
+  .formula {
+    background: #0a0c14;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    color: #a3baf7;
+  }
+  .formula .comment { color: #4a5580; font-style: italic; }
+
+  /* ======= FOOTER ======= */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 40px;
+  }
+
+  /* ======= RESPONSIVE ======= */
+  @media (max-width: 768px) {
+    .layout { flex-direction: column; padding: 24px 16px; }
+    .sidebar { width: 100%; position: static; }
+    .hero { padding: 48px 20px 40px; }
+    .arch-flow { min-width: 600px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-badge">社内限定資料</div>
+  <h1>架電ディレクション<br>自動アサインシステム</h1>
+  <p>チャットで話しかけるだけで、架電スタッフへの日次割り振りを自動生成します。<br>運用者・管理職向け 取扱説明書</p>
+  <div class="hero-meta">
+    <span>📅 最終更新：2026年5月</span>
+    <span>📋 対象：運用担当者・管理職</span>
+    <span>🔒 社外秘</span>
+  </div>
+</div>
+
+<!-- ===== LAYOUT ===== -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-title">目次</div>
+    <a href="#overview">1. システム概要</a>
+    <a href="#architecture">2. 仕組み・構成</a>
+    <a href="#howto">3. 操作方法</a>
+    <a href="#members">4. メンバー管理</a>
+    <a href="#algorithm">5. 割り振りロジック</a>
+    <a href="#schedule">6. 自動実行スケジュール</a>
+    <a href="#sheets">7. シート構成</a>
+    <a href="#trouble">8. トラブル対処</a>
+    <a href="#caution">9. 注意事項</a>
+    <a href="#contact">10. 管理・連絡先</a>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ===== 1. OVERVIEW ===== -->
+    <section class="section" id="overview">
+      <div class="section-header">
+        <div class="section-number">1</div>
+        <h2>システム概要</h2>
+      </div>
+
+      <p>このシステムは、<strong>毎月の架電業務を自動で各スタッフに割り振り</strong>し、Googleスプレッドシートの「OUTPUT」シートへ出力するツールです。チャットで自然言語の指示を送るだけで実行でき、エンジニア不要で運用できます。</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🎯 目的</div>
+          <ul>
+            <li>架電スタッフへの日次ノルマを自動計算</li>
+            <li>月の残り業務時間から逆算して均等配分</li>
+            <li>フォーカスクライアントへ優先割り当て</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">✅ できること</div>
+          <ul>
+            <li>月次割り振りの即時実行</li>
+            <li>フォーカス設定・アライアンス比率の変更</li>
+            <li>特定期間・特定スタッフへの絞り込み</li>
+            <li>毎朝8時の自動実行（設定済み）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="alert info">
+        <div class="alert-icon">ℹ️</div>
+        <div><strong>利用の前提</strong>Googleスプレッドシートに COCKPIT・CALLER・SHIFT・LIST・CONFIG・OUTPUT の各シートが整っている必要があります。データが不足していると正常に動作しません。</div>
+      </div>
+    </section>
+
+    <!-- ===== 2. ARCHITECTURE ===== -->
+    <section class="section" id="architecture">
+      <div class="section-header">
+        <div class="section-number">2</div>
+        <h2>仕組み・構成</h2>
+      </div>
+
+      <h3>2-1. 全体アーキテクチャ</h3>
+
+      <div style="font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); margin-bottom:10px; padding-left:4px;">① 割り振り自動生成フロー</div>
+      <div class="arch">
+        <div class="arch-flow">
+          <div class="arch-node accent">
+            <div class="icon">💬</div>
+            <div class="label">チャットUI</div>
+            <div class="sublabel">GAS配信HTML</div>
+          </div>
+          <div class="arch-arrow">→<span class="arrow-label">自然言語</span></div>
+          <div class="arch-node">
+            <div class="icon">🤖</div>
+            <div class="label">Dify LLM</div>
+            <div class="sublabel">意図解析・JSON生成</div>
+          </div>
+          <div class="arch-arrow">→<span class="arrow-label">HTTP POST</span></div>
+          <div class="arch-node">
+            <div class="icon">⚡</div>
+            <div class="label">GAS WebApp</div>
+            <div class="sublabel">実行エンジン</div>
+          </div>
+          <div class="arch-arrow">→<span class="arrow-label">書き込み</span></div>
+          <div class="arch-node green">
+            <div class="icon">📊</div>
+            <div class="label">吐き出し①</div>
+            <div class="sublabel">OUTPUTシート</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--green); margin:24px 0 10px; padding-left:4px;">② ディレクションシート反映フロー</div>
+      <div class="arch">
+        <div class="arch-flow">
+          <div class="arch-node green">
+            <div class="icon">📊</div>
+            <div class="label">吐き出し①</div>
+            <div class="sublabel">OUTPUTシート</div>
+          </div>
+          <div class="arch-arrow">→<span class="arrow-label">反映ダイアログ</span></div>
+          <div class="arch-node">
+            <div class="icon">⚡</div>
+            <div class="label">GAS</div>
+            <div class="sublabel">SyncDirection.gs</div>
+          </div>
+          <div class="arch-arrow">→<span class="arrow-label">マッチング&書込</span></div>
+          <div class="arch-node" style="border-color:rgba(247,201,72,.5); background:rgba(247,201,72,.08);">
+            <div class="icon">📋</div>
+            <div class="label">ディレクション②</div>
+            <div class="sublabel">月別シート</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(247,201,72,.06); border:1.5px solid rgba(247,201,72,.35); border-radius:var(--radius); padding:20px 24px; margin-top:20px;">
+        <div style="font-size:12px; font-weight:700; color:var(--yellow); letter-spacing:1px; margin-bottom:14px;">⚙ 反映ロジック（② SyncDirection.gs）</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:12px; color:var(--text);">
+          <div style="background:var(--surface); border-radius:8px; padding:12px;">
+            <div style="color:var(--accent); font-weight:700; margin-bottom:6px;">マッチング条件</div>
+            <div style="color:var(--muted); line-height:1.7;">
+              クライアント名（A列）<br>
+              ＋ 日付（行1ヘッダー M/D形式）<br>
+              → 架電者列を特定して書き込み
+            </div>
+          </div>
+          <div style="background:var(--surface); border-radius:8px; padding:12px;">
+            <div style="color:var(--green); font-weight:700; margin-bottom:6px;">書き込み内容</div>
+            <div style="color:var(--muted); line-height:1.7;">
+              架電者名 ＋ 時間帯<br>
+              例：<code style="font-size:11px;">山田 13時-14時</code><br>
+              書き込み前に対象セルをクリア
+            </div>
+          </div>
+          <div style="background:var(--surface); border-radius:8px; padding:12px;">
+            <div style="color:var(--accent2); font-weight:700; margin-bottom:6px;">フィルター機能</div>
+            <div style="color:var(--muted); line-height:1.7;">
+              全体 / 指定日 / クライアント<br>
+              / メンバー / 通常・アライアンス<br>
+              → ダイアログで選択して実行
+            </div>
+          </div>
+          <div style="background:var(--surface); border-radius:8px; padding:12px;">
+            <div style="color:var(--red); font-weight:700; margin-bottom:6px;">スキップ条件</div>
+            <div style="color:var(--muted); line-height:1.7;">
+              企業名が②に存在しない<br>
+              日付が②ヘッダーに存在しない<br>
+              → ログに記録してスキップ
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>2-2. Difyワークフロー（チャット内部処理）</h3>
+      <div class="workflow">
+        <div class="wf-node">
+          <div class="wf-line">
+            <div class="wf-dot blue">1</div>
+            <div class="wf-connector"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">Intent解析（LLM）</div>
+            <div class="wf-desc">ユーザーの発言からアクション・月・対象クライアント・設定変更値を抽出。JSON形式に変換する。</div>
+          </div>
+        </div>
+        <div class="wf-node">
+          <div class="wf-line">
+            <div class="wf-dot purple">2</div>
+            <div class="wf-connector"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">CODEノード（パラメータ整形）</div>
+            <div class="wf-desc">LLM出力をGAS送信用に整形。月の数値化、focus_clients / alliance_ratio の型変換などを行う。</div>
+          </div>
+        </div>
+        <div class="wf-node">
+          <div class="wf-line">
+            <div class="wf-dot orange">3</div>
+            <div class="wf-connector"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">実行判定（IF-ELSE）</div>
+            <div class="wf-desc">アクションが「ping（疎通確認）」か「実行」かで分岐。実行の場合のみHTTPノードへ進む。</div>
+          </div>
+        </div>
+        <div class="wf-node">
+          <div class="wf-line">
+            <div class="wf-dot blue">4</div>
+            <div class="wf-connector"></div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">HTTP（GAS呼び出し）</div>
+            <div class="wf-desc">GAS WebAppのURLへPOSTリクエストを送信。GASが処理を実行してレスポンスを返す（通常5〜30秒）。</div>
+          </div>
+        </div>
+        <div class="wf-node">
+          <div class="wf-line">
+            <div class="wf-dot green">5</div>
+          </div>
+          <div class="wf-content">
+            <div class="wf-title">Answerノード（返答生成）</div>
+            <div class="wf-desc">GASのレスポンスを自然言語に変換して画面に表示。出力行数・クライアント数などを含む。</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>2-3. チャットUI（テンプレート操作画面）の仕組み</h3>
+      <p style="margin-bottom:16px; color:var(--muted); font-size:14px;">専用のチャット画面（テンプレートUI）はGASから配信されます。APIキーはブラウザに露出しない安全な設計です。</p>
+
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px;">
+        <div style="text-align:center; font-size:12px; color:var(--muted); margin-bottom:20px; letter-spacing:1px; text-transform:uppercase;">チャットUI — 3層構成</div>
+        <div style="display:flex; gap:0; align-items:stretch; flex-wrap:wrap; justify-content:center;">
+          <div style="flex:1; min-width:160px; background:rgba(91,141,238,.1); border:1px solid rgba(91,141,238,.4); border-radius:10px; padding:16px; text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">🌐</div>
+            <div style="font-size:13px; font-weight:700; color:var(--accent); margin-bottom:6px;">HTML窓口</div>
+            <div style="font-size:11px; color:var(--muted); line-height:1.6;">ブラウザ<br>（誰のPCからでもアクセス可）<br><br>テンプレート選択・変数入力・チャット履歴表示</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 12px; color:var(--muted); font-size:11px; text-align:center;">
+            <div style="font-size:18px;">⇄</div>
+            <div style="font-size:10px; margin-top:4px;">google.script.run<br>（HTTPS安全通信）</div>
+          </div>
+          <div style="flex:1; min-width:160px; background:rgba(255,193,7,.08); border:1px solid rgba(255,193,7,.3); border-radius:10px; padding:16px; text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">⚡</div>
+            <div style="font-size:13px; font-weight:700; color:var(--yellow); margin-bottom:6px;">GAS実行エンジン</div>
+            <div style="font-size:11px; color:var(--muted); line-height:1.6;">Google Apps Script<br>（サーバーサイド）<br><br>HTML配信・APIキー保管・Dify呼び出し・メンバー取得</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 12px; color:var(--muted); font-size:11px; text-align:center;">
+            <div style="font-size:18px;">⇄</div>
+            <div style="font-size:10px; margin-top:4px;">Dify API<br>（Bearer認証）</div>
+          </div>
+          <div style="flex:1; min-width:160px; background:rgba(124,92,252,.1); border:1px solid rgba(124,92,252,.4); border-radius:10px; padding:16px; text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">🤖</div>
+            <div style="font-size:13px; font-weight:700; color:var(--accent2); margin-bottom:6px;">Dify通訳</div>
+            <div style="font-size:11px; color:var(--muted); line-height:1.6;">Dify Chatflow<br>（クラウドAI）<br><br>LLM意図解析・GAS呼び出し・結果フォーマット</div>
+          </div>
+        </div>
+        <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+          <div style="font-size:12px; color:var(--muted); margin-bottom:10px; font-weight:600;">送信から返答までの流れ</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <div style="background:var(--surface); border-radius:6px; padding:6px 10px; font-size:11px; color:var(--text);">① テンプレ選択＆送信</div>
+            <div style="color:var(--muted); font-size:11px;">→</div>
+            <div style="background:var(--surface); border-radius:6px; padding:6px 10px; font-size:11px; color:var(--text);">② GASがDifyにPOST（APIキーはGAS内で管理）</div>
+            <div style="color:var(--muted); font-size:11px;">→</div>
+            <div style="background:var(--surface); border-radius:6px; padding:6px 10px; font-size:11px; color:var(--text);">③ Dify LLMが意図を解析</div>
+            <div style="color:var(--muted); font-size:11px;">→</div>
+            <div style="background:var(--surface); border-radius:6px; padding:6px 10px; font-size:11px; color:var(--text);">④ GASがスプレッドシートを更新</div>
+            <div style="color:var(--muted); font-size:11px;">→</div>
+            <div style="background:var(--surface); border-radius:6px; padding:6px 10px; font-size:11px; color:var(--text);">⑤ 結果がチャット履歴に表示</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert info">
+        <div class="alert-icon">🔒</div>
+        <div><strong>APIキーはブラウザに渡らない</strong>　チャットUIのHTMLにDifyのAPIキーは含まれていません。ブラウザは <code>google.script.run</code> でGASに処理を依頼し、GASが内部でAPIキーを使ってDifyに接続します。誰のPCからURLを開いてもAPIキーが漏れる心配がありません。</div>
+      </div>
+
+      <h3 style="margin-top:32px;">2-4. GASの役割（実行エンジン詳細）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>処理</th><th>内容</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>syncCOCKPIT</code></td><td>COCKPITシートからクライアント情報（残り時間・完了状況）を読み込む</td></tr>
+            <tr><td><code>syncCALLER</code></td><td>CALLERシートからスタッフ一覧を読み込む</td></tr>
+            <tr><td><code>syncSHIFT</code></td><td>SHIFTシートから今月の出勤日・業務コマ数を計算する</td></tr>
+            <tr><td><code>syncLIST</code></td><td>LISTシートから架電リスト（案件）を読み込む</td></tr>
+            <tr><td><code>runMonthlyForMonth</code></td><td>上記データを統合して日次割り振りを計算し、OUTPUTシートへ書き出す</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== 3. HOWTO ===== -->
+    <section class="section" id="howto">
+      <div class="section-header">
+        <div class="section-number">3</div>
+        <h2>操作方法</h2>
+      </div>
+
+      <h3>3-1. チャットボットへのアクセス</h3>
+      <div class="card">
+        <div class="card-title">🔗 アクセスURL（メインUI）</div>
+        <code style="word-break:break-all; font-size:12px;"><a href="https://yuma2004ueda.github.io/kaiden-manual/chat.html" target="_blank" style="color:var(--accent);">https://yuma2004ueda.github.io/kaiden-manual/chat.html</a></code>
+        <p style="margin-top:10px; font-size:13px; color:var(--muted);">GitHub Pagesで公開。パスワード認証後にチャットが使用可能。ブックマーク推奨。</p>
+        <div style="margin-top:12px; padding:10px 14px; background:rgba(91,141,238,.08); border:1px solid rgba(91,141,238,.25); border-radius:8px; font-size:12px; color:var(--muted);">
+          🔒 アクセスには社内パスワードが必要です。パスワードは管理者に確認してください。
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-title">📖 取扱説明書URL（本ページ）</div>
+        <code style="word-break:break-all; font-size:12px;"><a href="https://yuma2004ueda.github.io/kaiden-manual/" target="_blank" style="color:var(--accent);">https://yuma2004ueda.github.io/kaiden-manual/</a></code>
+        <p style="margin-top:10px; font-size:13px; color:var(--muted);">GitHub Pagesで公開。ログイン不要・どのデバイスからでもアクセス可。ブックマーク推奨。</p>
+      </div>
+
+      <div class="alert warning">
+        <div class="alert-icon">⚠️</div>
+        <div><strong>タブを前面に保つこと</strong>Chromeでチャット中はそのタブをアクティブにしてください。背面タブになると応答が途中で止まって見える場合があります（実際にはサーバー処理は完了しています）。返答が来ない場合はOUTPUTシートを直接確認してください。</div>
+      </div>
+
+      <h3>3-2. 基本操作 — 実行例</h3>
+
+      <div class="chat-demo">
+        <div class="chat-demo-title">例1 ｜ 今月の割り振りを実行</div>
+        <div class="bubble user"><div class="bubble-inner">今月5月の割り振りを実行してください</div></div>
+        <div class="bubble bot"><div class="bubble-inner">✅ 5月分の割り振りを実行しました。<br>出力行数：1,287行<br>対象クライアント数：8社</div></div>
+      </div>
+
+      <div class="chat-demo">
+        <div class="chat-demo-title">例2 ｜ フォーカスクライアントを設定して実行</div>
+        <div class="bubble user"><div class="bubble-inner">Vision Base株式会社の割り振りを1時間増やして今月5月分を実行してください</div></div>
+        <div class="bubble bot"><div class="bubble-inner">✅ Vision Base株式会社をフォーカス設定して5月分を実行しました。<br>出力行数：1,287行</div></div>
+      </div>
+
+      <div class="chat-demo">
+        <div class="chat-demo-title">例3 ｜ アライアンス比率を変更</div>
+        <div class="bubble user"><div class="bubble-inner">アライアンス比率を60%に変更して実行してください</div></div>
+        <div class="bubble bot"><div class="bubble-inner">✅ アライアンス比率を60%に更新し、5月分を実行しました。</div></div>
+      </div>
+
+      <div class="chat-demo">
+        <div class="chat-demo-title">例4 ｜ 疎通確認（動作テスト）</div>
+        <div class="bubble user"><div class="bubble-inner">システムが動いているか確認してください</div></div>
+        <div class="bubble bot"><div class="bubble-inner">🟢 システム稼働中です。（pong応答確認）</div></div>
+      </div>
+
+      <h3>3-3. 対応できる指示一覧</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>やりたいこと</th><th>指示の例</th><th>効果</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>月次実行</td>
+              <td>「今月分を実行して」</td>
+              <td>OUTPUTシートを最新データで上書き</td>
+            </tr>
+            <tr>
+              <td>フォーカス設定</td>
+              <td>「○○社を優先して実行」<br>「○○社の割り振りを増やして」</td>
+              <td>対象社のブロック上限を+1（最大4）</td>
+            </tr>
+            <tr>
+              <td>アライアンス比率変更</td>
+              <td>「アライアンス比率を50%に」</td>
+              <td>CONFIGシートを更新して再計算</td>
+            </tr>
+            <tr>
+              <td>複数クライアントフォーカス</td>
+              <td>「A社とB社を優先して」</td>
+              <td>カンマ区切りで複数社を同時フォーカス</td>
+            </tr>
+            <tr>
+              <td>メンバー一覧確認</td>
+              <td>「メンバー見せて」「誰がいる？」「一覧」</td>
+              <td>MEMBERシートの全員情報をJSON表示</td>
+            </tr>
+            <tr>
+              <td>メンバー肩書変更</td>
+              <td>「○○をリーダーにして」「○○をMGRにして」</td>
+              <td>MEMBERシートのrank列を即時更新</td>
+            </tr>
+            <tr>
+              <td>アライアンス参加設定</td>
+              <td>「○○のアライアンスをtrueにして」</td>
+              <td>MEMBERシートのisAlliance列を即時更新</td>
+            </tr>
+            <tr>
+              <td>着地タイプ変更</td>
+              <td>「○○の着地タイプをアポのみにして」</td>
+              <td>MEMBERシートのlandingType列を即時更新</td>
+            </tr>
+            <tr>
+              <td>担当事業変更</td>
+              <td>「○○の担当事業を新規開拓にして」</td>
+              <td>MEMBERシートのbusiness列を即時更新</td>
+            </tr>
+            <tr>
+              <td>疎通確認</td>
+              <td>「動いてる？」「テスト」</td>
+              <td>GASへpingを送り「pong」レスポンスを確認</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3-4. 結果の確認方法</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">チャットの返答を確認</div>
+            <div class="step-desc">「✅ 実行しました。出力行数：○行」と表示されれば成功です。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">スプレッドシートのOUTPUTシートを確認</div>
+            <div class="step-desc">Googleスプレッドシートを開き「OUTPUT」シートを選択。最新の割り振りが上書きされています。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">日付・スタッフ名・架電数を目視確認</div>
+            <div class="step-desc">列：クライアント名 / トーク / 架電者 / 架電日 / 架電時間 / 目標架電数 / 注意事項 / 種別</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 4. MEMBERS ===== -->
+    <section class="section" id="members">
+      <div class="section-header">
+        <div class="section-number">4</div>
+        <h2>メンバー管理</h2>
+      </div>
+
+      <p>架電スタッフの情報はスプレッドシートの <strong>MEMBERシート</strong> で管理されます。チャットから参照・変更が可能です。変更は即時反映され、次回のアサイン実行に適用されます。</p>
+
+      <h3>4-1. メンバー一覧の確認</h3>
+      <div class="chat-demo">
+        <div class="chat-demo-title">例 ｜ メンバー一覧を確認</div>
+        <div class="bubble user"><div class="bubble-inner">メンバー見せて</div></div>
+        <div class="bubble bot"><div class="bubble-inner">
+          <strong>メンバー一覧（3名）</strong>
+          <table style="margin-top:8px; border-collapse:collapse; width:100%; font-size:12px;">
+            <thead><tr style="background:rgba(255,255,255,.08);">
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 8px;">名前</th>
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 8px;">肩書</th>
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 8px;">アライアンス</th>
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 8px;">担当事業</th>
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 8px;">着地タイプ</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">山田太郎</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">リーダー</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px; text-align:center;">✅</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">新規開拓</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">アポ・資料</td></tr>
+              <tr><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">鈴木花子</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">プレーヤー</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px; text-align:center;">❌</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">既存顧客</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">アポのみ</td></tr>
+              <tr><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">田中一郎</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">マネージャー</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px; text-align:center;">✅</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">新規開拓</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 8px;">なんでも</td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+
+      <h3>4-2. メンバー属性の変更</h3>
+      <p>変更可能な項目は以下の4つです。変更しない項目は省略でき、現在値が保持されます。</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>項目</th><th>キー名</th><th>有効値</th><th>指示例</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>肩書</td>
+              <td><code>rank</code></td>
+              <td>MGR / リーダー / サブリーダー / プレーヤー / ルーキー / 新人</td>
+              <td>「○○をMGRにして」</td>
+            </tr>
+            <tr>
+              <td>アライアンス参加</td>
+              <td><code>isAlliance</code></td>
+              <td>true / false</td>
+              <td>「○○のアライアンスをtrueにして」</td>
+            </tr>
+            <tr>
+              <td>担当事業</td>
+              <td><code>business</code></td>
+              <td>任意の文字列</td>
+              <td>「○○の担当事業を新規開拓にして」</td>
+            </tr>
+            <tr>
+              <td>着地タイプ</td>
+              <td><code>landingType</code></td>
+              <td>アポ・資料 / アポのみ / 資料のみ / なんでも</td>
+              <td>「○○の着地タイプをアポのみにして」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="chat-demo">
+        <div class="chat-demo-title">例1 ｜ 肩書を変更</div>
+        <div class="bubble user"><div class="bubble-inner">賀数凌をリーダーにして</div></div>
+        <div class="bubble bot"><div class="bubble-inner">
+          ✅ <strong>更新完了：1名</strong>
+          <table style="margin-top:8px; border-collapse:collapse; font-size:12px;">
+            <thead><tr style="background:rgba(255,255,255,.08);">
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 10px;">名前</th>
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 10px;">結果</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="border:1px solid rgba(255,255,255,.1); padding:5px 10px;">賀数凌</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 10px;">✅ 更新済み</td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+
+      <div class="chat-demo">
+        <div class="chat-demo-title">例2 ｜ 着地タイプを変更</div>
+        <div class="bubble user"><div class="bubble-inner">足立準の着地タイプをアポのみにして</div></div>
+        <div class="bubble bot"><div class="bubble-inner">
+          ✅ <strong>更新完了：1名</strong>
+          <table style="margin-top:8px; border-collapse:collapse; font-size:12px;">
+            <thead><tr style="background:rgba(255,255,255,.08);">
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 10px;">名前</th>
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 10px;">結果</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="border:1px solid rgba(255,255,255,.1); padding:5px 10px;">足立準</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 10px;">✅ 更新済み</td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+
+      <div class="chat-demo">
+        <div class="chat-demo-title">例3 ｜ 複数項目を同時変更</div>
+        <div class="bubble user"><div class="bubble-inner">長木メーテルのアライアンスをtrueにして担当事業を新規開拓にして</div></div>
+        <div class="bubble bot"><div class="bubble-inner">
+          ✅ <strong>更新完了：1名</strong>
+          <table style="margin-top:8px; border-collapse:collapse; font-size:12px;">
+            <thead><tr style="background:rgba(255,255,255,.08);">
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 10px;">名前</th>
+              <th style="border:1px solid rgba(255,255,255,.15); padding:5px 10px;">結果</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="border:1px solid rgba(255,255,255,.1); padding:5px 10px;">長木メーテル</td><td style="border:1px solid rgba(255,255,255,.1); padding:5px 10px;">✅ 更新済み</td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+
+      <div class="alert warning">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>メンバー名は完全一致が必要</strong>
+          チャットで指定する名前は、MEMBERシートのA列と<strong>完全一致</strong>している必要があります。存在しない名前は <code>notFound</code> に返されます。「メンバー見せて」で正確な名前を確認してから変更してください。
+        </div>
+      </div>
+
+      <div class="alert info">
+        <div class="alert-icon">ℹ️</div>
+        <div>
+          <strong>メンバーの追加・削除はスプレッドシートで行う</strong>
+          チャットからはメンバーの追加・削除はできません。MEMBERシートに直接行を追加・削除してください。追加後は次回アサイン実行から反映されます。
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 5. ALGORITHM ===== -->
+    <section class="section" id="algorithm">
+      <div class="section-header">
+        <div class="section-number">5</div>
+        <h2>割り振りロジック</h2>
+      </div>
+
+      <h3>5-1. 基本パラメータ</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>定数名</th><th>値</th><th>意味</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>CALLS_PER_HOUR</code></td><td>20件</td><td>1時間あたりの架電件数（業界標準値）</td></tr>
+            <tr><td><code>CLIENT_MIN_BLOCKS</code></td><td>2コマ</td><td>1日あたりの最小割り当てコマ数</td></tr>
+            <tr><td><code>CLIENT_MAX_BLOCKS</code></td><td>3コマ</td><td>通常時の1日あたり最大割り当てコマ数</td></tr>
+            <tr><td><code>WORK_HOURS</code></td><td>9,10,11,13,14,15,16,17時</td><td>1日8コマ（昼12時を除く）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>5-2. 日次ブロック計算式</h3>
+      <div class="formula">
+        <span class="comment">// 今日以降の残りシフト日数を求める</span><br>
+        remainingShiftDays = (月末まで出勤予定の日数)<br><br>
+        <span class="comment">// 1日あたりの必要時間を算出</span><br>
+        todayH = remH / remainingShiftDays<br><br>
+        <span class="comment">// ブロック数を決定（切り上げ、最小2・最大3コマ）</span><br>
+        targetBlocks = min(maxBlocks, max(2, ceil(todayH)))
+      </div>
+
+      <h3>5-3. フォーカス設定の効果</h3>
+      <p>フォーカスに設定したクライアントは <code>maxBlocks</code> が <strong>3→4</strong> に上昇します。ただし、自然計算の <code>targetBlocks</code> がすでに3以下の場合は効果がありません。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>残り時間(remH)</th><th>残りシフト日数</th><th>todayH</th><th>通常(max=3)</th><th>フォーカス(max=4)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>24h</td><td>8日</td><td>3.0h</td>
+              <td><span class="tag blue">3コマ</span></td>
+              <td><span class="tag blue">3コマ</span> <span class="tag yellow">変化なし</span></td>
+            </tr>
+            <tr>
+              <td>36h</td><td>8日</td><td>4.5h</td>
+              <td><span class="tag blue">3コマ（上限）</span></td>
+              <td><span class="tag green">4コマ ✓効果あり</span></td>
+            </tr>
+            <tr>
+              <td>60h</td><td>10日</td><td>6.0h</td>
+              <td><span class="tag blue">3コマ（上限）</span></td>
+              <td><span class="tag green">4コマ ✓効果あり</span></td>
+            </tr>
+            <tr>
+              <td>15h</td><td>8日</td><td>1.875h</td>
+              <td><span class="tag blue">2コマ（最小保証）</span></td>
+              <td><span class="tag blue">2コマ</span> <span class="tag yellow">変化なし</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="alert info">
+        <div class="alert-icon">💡</div>
+        <div><strong>フォーカス設定が効果を発揮する条件</strong>残り時間 ÷ 残りシフト日数 が 3h を超えているときのみ、フォーカス設定でブロックが増加します（3コマ→4コマ）。月末に近づき残り時間が少ない場合は変化が出ません。</div>
+      </div>
+
+      <h3>5-4. アライアンス比率</h3>
+      <p>アライアンス案件（提携先からの案件）の割り当て比率を 0〜80% で設定できます。CONFIGシートの <code>alliance_ratio</code> で管理されています。</p>
+    </section>
+
+    <!-- ===== 6. SCHEDULE ===== -->
+    <section class="section" id="schedule">
+      <div class="section-header">
+        <div class="section-number">6</div>
+        <h2>自動実行スケジュール</h2>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⏰ 毎朝8時 — 自動実行</div>
+        <p style="margin-top:8px;">GASのタイムトリガーにより、毎朝8時に以下の処理が自動実行されます：</p>
+        <ol style="margin-top:8px; padding-left:20px; font-size:14px; color:#c8d0e8;">
+          <li>syncCOCKPIT（クライアント情報の読み込み）</li>
+          <li>syncCALLER（スタッフ情報の読み込み）</li>
+          <li>syncSHIFT（シフト情報の読み込み）</li>
+          <li>syncLIST（架電リストの読み込み）</li>
+          <li>runMonthlyForMonth（割り振り計算＆OUTPUT書き出し）</li>
+        </ol>
+      </div>
+
+      <div class="alert success">
+        <div class="alert-icon">✅</div>
+        <div><strong>通常運用は何もしなくてOK</strong>スタッフは毎朝出勤時にOUTPUTシートを確認するだけです。月の途中でデータを変更した場合や、臨時で再計算したい場合のみチャットで指示を出してください。</div>
+      </div>
+
+      <div class="alert warning">
+        <div class="alert-icon">⚠️</div>
+        <div><strong>フォーカス設定は手動実行時のみ有効</strong>毎朝の自動実行はCONFIGシートに保存されたフォーカス設定を読み取ります。チャットで設定変更＋実行を行うと、その設定がCONFIGシートに保存され、翌朝以降の自動実行にも引き継がれます。</div>
+      </div>
+    </section>
+
+    <!-- ===== 7. SHEETS ===== -->
+    <section class="section" id="sheets">
+      <div class="section-header">
+        <div class="section-number">7</div>
+        <h2>シート構成</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>シート名</th><th>用途</th><th>更新タイミング</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>COCKPIT</strong></td>
+              <td>クライアントごとの月間目標時間・残り時間・完了フラグ</td>
+              <td>手動管理（月初に設定）</td>
+            </tr>
+            <tr>
+              <td><strong>CALLER</strong></td>
+              <td>架電スタッフの一覧（名前・担当クライアントなど）</td>
+              <td>スタッフ追加・変更時に手動更新</td>
+            </tr>
+            <tr>
+              <td><strong>SHIFT</strong></td>
+              <td>各スタッフの月間シフト（出勤日・業務時間帯）</td>
+              <td>毎月シフト確定後に手動入力</td>
+            </tr>
+            <tr>
+              <td><strong>LIST</strong></td>
+              <td>架電案件リスト（クライアント・トーク・種別など）</td>
+              <td>案件追加時に随時更新</td>
+            </tr>
+            <tr>
+              <td><strong>CONFIG</strong></td>
+              <td>focus_clients・alliance_ratio・notesなどの設定値</td>
+              <td>チャット経由で自動更新</td>
+            </tr>
+            <tr>
+              <td><strong>MEMBER</strong></td>
+              <td>架電スタッフの属性情報（肩書・アライアンス参加・担当事業・着地タイプ）</td>
+              <td>チャット経由またはスプレッドシート直接編集</td>
+            </tr>
+            <tr>
+              <td><strong>OUTPUT</strong></td>
+              <td>日次割り振り結果（スタッフ×日付×架電数）</td>
+              <td>実行のたびに全消去＆再書き込み</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>MEMBERシートの列構成</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>列</th><th>キー名</th><th>内容</th><th>有効値</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A</td><td>name</td><td>架電者名（キー）</td><td>文字列（完全一致で参照）</td></tr>
+            <tr><td>B</td><td>rank</td><td>肩書</td><td>MGR / リーダー / サブリーダー / プレーヤー / ルーキー / 新人</td></tr>
+            <tr><td>C</td><td>isAlliance</td><td>アライアンス参加フラグ</td><td>TRUE / FALSE</td></tr>
+            <tr><td>D</td><td>business</td><td>担当事業</td><td>任意文字列</td></tr>
+            <tr><td>E</td><td>landingType</td><td>対応着地タイプ</td><td>アポ・資料 / アポのみ / 資料のみ / なんでも</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>OUTPUTシートの列構成</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>列</th><th>内容</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>クライアント名</td><td>架電先企業名</td></tr>
+            <tr><td>トーク</td><td>使用するトークスクリプト名</td></tr>
+            <tr><td>架電者</td><td>担当スタッフ名</td></tr>
+            <tr><td>架電日</td><td>実施予定日（YYYY/M/D形式）</td></tr>
+            <tr><td>架電時間</td><td>担当コマの時間帯（例：9:00〜10:00）</td></tr>
+            <tr><td>目標架電数</td><td>そのコマで架けるべき件数（時間×20件）</td></tr>
+            <tr><td>注意事項</td><td>クライアント個別の注意・禁止事項など</td></tr>
+            <tr><td>種別</td><td>通常 or アライアンスの区別</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== 8. TROUBLE ===== -->
+    <section class="section" id="trouble">
+      <div class="section-header">
+        <div class="section-number">8</div>
+        <h2>トラブル対処</h2>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔴 チャットが「処理中...」のまま止まる</div>
+        <p style="font-size:13px; margin-top:8px; color:#c8d0e8;"><strong>原因：</strong>Chromeの背面タブ規制によりSSE（Server-Sent Events）の受信が遅延・途絶している。サーバー側は正常に処理完了している可能性が高い。</p>
+        <p style="font-size:13px; color:#c8d0e8;"><strong>対処：</strong>OUTPUTシートを直接確認。最終更新日時が今日ならば処理成功。チャットのタブを前面に保ったうえで再試行する場合は、新しい会話（↺ボタン）を使用すること。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔴 チャットが「エラーが発生しました」と返答する</div>
+        <p style="font-size:13px; margin-top:8px; color:#c8d0e8;"><strong>原因：</strong>GAS側でエラー発生か、Difyのワークフロー処理に失敗。</p>
+        <p style="font-size:13px; color:#c8d0e8;"><strong>対処：</strong>①「システムが動いているか確認して」と送信し疎通確認を行う。②スプレッドシートのデータ（COCKPIT・SHIFT等）に不正な値がないか確認する。③それでも解決しない場合はシステム管理者に連絡。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔴 OUTPUTシートのデータが古い / 変化がない</div>
+        <p style="font-size:13px; margin-top:8px; color:#c8d0e8;"><strong>原因：</strong>実行が失敗しているか、対象月のデータが存在しない。</p>
+        <p style="font-size:13px; color:#c8d0e8;"><strong>対処：</strong>チャットで「今月分を実行してください」と再送信する。COCKPITシートに今月のデータが入力されているか確認する。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🟡 フォーカス設定しても割り振り数が増えない</div>
+        <p style="font-size:13px; margin-top:8px; color:#c8d0e8;"><strong>原因：</strong>そのクライアントの残り時間が少なく、自然計算でもブロック数が3以下になっている（正常な動作）。</p>
+        <p style="font-size:13px; color:#c8d0e8;"><strong>確認方法：</strong>COCKPITシートで対象クライアントの残り時間を確認。「残り時間 ÷ 残りシフト日数」が3hを超えていない場合、フォーカスは効果を発揮しません。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🟡 チャット画面が真っ白 / 読み込まない</div>
+        <p style="font-size:13px; margin-top:8px; color:#c8d0e8;"><strong>対処：</strong>ブラウザキャッシュをクリア（Ctrl+Shift+R）してリロード。別ブラウザ（Chrome推奨）で試す。</p>
+      </div>
+    </section>
+
+    <!-- ===== 9. CAUTION ===== -->
+    <section class="section" id="caution">
+      <div class="section-header">
+        <div class="section-number">9</div>
+        <h2>注意事項</h2>
+      </div>
+
+      <div class="alert danger">
+        <div class="alert-icon">🚫</div>
+        <div>
+          <strong>OUTPUTシートは実行のたびに全消去されます</strong>
+          OUTPUTシートに手動で追記した内容は、次回実行時にすべて消えます。カスタム情報を保存したい場合は別シートに控えてください。
+        </div>
+      </div>
+
+      <div class="alert danger">
+        <div class="alert-icon">🚫</div>
+        <div>
+          <strong>COCKPITシートのデータが最重要</strong>
+          残り時間・目標時間・完了フラグが正確でないと、割り振りが誤った数値になります。月初は必ずCOCKPITシートの内容を確認してから実行してください。
+        </div>
+      </div>
+
+      <div class="alert warning">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>フォーカスクライアント名は完全一致</strong>
+          チャットで指定する社名は、COCKPITシートに登録されている社名と<strong>完全一致</strong>している必要があります。略称や表記ゆれがあると無効になります。正式名称をコピー&ペーストして使用してください。
+        </div>
+      </div>
+
+      <div class="alert warning">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>SHIFTシートの整備が前提</strong>
+          SHIFTシートに今月の出勤日が未入力の場合、残りシフト日数が0になり計算が正常に行えません。毎月のシフト確定後に必ず入力してください。
+        </div>
+      </div>
+
+      <div class="alert info">
+        <div class="alert-icon">ℹ️</div>
+        <div>
+          <strong>フォーカス設定はCONFIGシートに保存されます</strong>
+          チャットでフォーカス設定を変更すると、その内容がCONFIGシートに上書き保存されます。設定をリセットしたい場合は「フォーカスを解除して実行」と指示するか、CONFIGシートの <code>focus_clients</code> 欄を空白にしてください。
+        </div>
+      </div>
+
+      <div class="alert info">
+        <div class="alert-icon">ℹ️</div>
+        <div>
+          <strong>アライアンス比率の上限は80%</strong>
+          アライアンス比率の設定範囲は 0〜80% です。それ以外の値を入力した場合、システムが自動的に補正します。
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 10. CONTACT ===== -->
+    <section class="section" id="contact">
+      <div class="section-header">
+        <div class="section-number">10</div>
+        <h2>管理・連絡先</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>対象</th><th>連絡先 / 場所</th><th>備考</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>取扱説明書（本ページ）</td>
+              <td><code><a href="https://yuma2004ueda.github.io/kaiden-manual/" target="_blank" style="color:var(--accent);">https://yuma2004ueda.github.io/kaiden-manual/</a></code></td>
+              <td>GitHub Pages公開。ログイン不要・全デバイス対応</td>
+            </tr>
+            <tr>
+              <td>チャットUI</td>
+              <td><code><a href="https://yuma2004ueda.github.io/kaiden-manual/chat.html" target="_blank" style="color:var(--accent);">https://yuma2004ueda.github.io/kaiden-manual/chat.html</a></code></td>
+              <td>パスワード認証あり（管理者に確認）</td>
+            </tr>
+            <tr>
+              <td>チャットボット（Dify）</td>
+              <td><code>https://udify.app/chatbot/SdBVI7rCB2KVCuRv</code></td>
+              <td>Difyで管理（管理者のみ編集可）</td>
+            </tr>
+            <tr>
+              <td>GAS（実行エンジン）</td>
+              <td>Googleスプレッドシートの「拡張機能 → Apps Script」</td>
+              <td>GAS_DifyTrigger.gs が本体</td>
+            </tr>
+            <tr>
+              <td>スプレッドシート</td>
+              <td>Googleドライブ内「架電ディレクション管理」</td>
+              <td>各シートの権限は管理者が管理</td>
+            </tr>
+            <tr>
+              <td>システム不具合</td>
+              <td>社内担当者へ連絡</td>
+              <td>エラーメッセージのスクショを添付</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top: 24px;">
+        <div class="card-title">📝 変更履歴</div>
+        <div class="table-wrap" style="margin:8px 0 0;">
+          <table>
+            <thead><tr><th>日付</th><th>変更内容</th></tr></thead>
+            <tbody>
+              <tr><td>2026-05-12</td><td>初版作成・システム仕様書として公開</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <p>架電ディレクション自動アサインシステム — 取扱説明書</p>
+  <p style="margin-top:6px; font-size:12px;">社外秘 ｜ 本資料の無断転載・外部共有を禁じます</p>
+</footer>
+
+<script>
+  // Sidebar active state on scroll
+  const sections = document.querySelectorAll('.section');
+  const links = document.querySelectorAll('.sidebar a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
